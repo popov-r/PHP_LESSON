@@ -1,25 +1,29 @@
 <?php
 echo("Введите сроку для шифрования: ");
-$string =trim(fgets(STDIN));
+$string=trim(fgets(STDIN));
 echo("Введите сдвиг: ");
 fscanf(STDIN, "%d", $shift);
 $shift=$shift%26;
-function dict_encode($string){
-	$file=fopen("dict.txt",'r');
-	$num=strlen($string);
-	//var_dump($num);
+echo("Введите файл словаря: ");
+$secure = trim(fgets(STDIN));
+if (file_exists($secure)){
+function dict_encode($string,$secure){
+	$file=fopen($secure ,'r');
+	$num=strlen($string);;
 	for ($i=0;$i<$num;$i++){
-		$file=fopen("dict.txt",'r');
-		while (!feof($file)){
-			$str=fgets($file);
+		rewind($file);
+		//var_dump($file);
+		while (@!feof($file)){
+			$str=@fgets($file);
         		$str=trim($str);
 			$str=explode(':',$str);
 			//var_dump($str);
 			//var_dump($string[$i]);
 			if ($string[$i]==$str[0]){$string[$i]=$str[1];break;}
 		}
-		fclose($file);
+	
 	}
+	fclose($file);
 	return $string;
 }
 function cesar_encode($string, $shift){
@@ -50,16 +54,17 @@ function cesar_encode($string, $shift){
 		}
 	return $result;
 }
-$dict=dict_encode($string);
+
+$dict=dict_encode($string,$secure);
 $res=cesar_encode($dict,$shift);
 echo ("Зашифравання строка: ".$res."\n");
 
-function dict_decode($string){
-	$file=fopen("dict.txt",'r');
+function dict_decode($string, $secure){
+	$file=fopen($secure,'r');
         $num=strlen($string);
         //var_dump($num);
         for ($i=0;$i<$num;$i++){
-                $file=fopen("dict.txt",'r');
+                rewind($file);
                 while (!feof($file)){
                         $str=fgets($file);
                         $str=trim($str);
@@ -68,8 +73,8 @@ function dict_decode($string){
                         //var_dump($string[$i]);
                         if ($string[$i]==$str[1]){$string[$i]=$str[0];break;}
                 }       
-                fclose($file);
-        }
+	}
+	fclose($file);
         return $string;
 
 }
@@ -104,6 +109,6 @@ function cesar_decode($string,$shift){
 
 }
 $res_dec=cesar_decode($res,$shift);
-$res_dec=dict_decode($res_dec);
-echo("Расшифрованная строка:  $res_dec");
-
+$res_dec=dict_decode($res_dec, $secure);
+echo("Расшифрованная строка:  $res_dec");}
+else {echo("Упс...Файл словаря не существует. Проверьте название или создайте словарь!");}
